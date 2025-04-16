@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -28,6 +27,7 @@ export type BudgetState = {
   categories: Category[];
   expenses: Expense[];
   emergencyMode: boolean;
+  emergencyBudget: number | null;
   motivationalQuotes: string[];
   currentQuote: string;
 };
@@ -64,16 +64,18 @@ const initialState: BudgetState = {
   categories: defaultCategories,
   expenses: [],
   emergencyMode: false,
+  emergencyBudget: null,
   motivationalQuotes,
   currentQuote: motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)],
 };
 
 // Action types
 type BudgetAction =
-  | { type: "COMPLETE_ONBOARDING"; payload: Omit<BudgetState, "isOnboarded" | "expenses" | "emergencyMode" | "motivationalQuotes" | "currentQuote"> }
+  | { type: "COMPLETE_ONBOARDING"; payload: Omit<BudgetState, "isOnboarded" | "expenses" | "emergencyMode" | "emergencyBudget" | "motivationalQuotes" | "currentQuote"> }
   | { type: "ADD_EXPENSE"; payload: Omit<Expense, "id"> }
   | { type: "DELETE_EXPENSE"; payload: string }
-  | { type: "TOGGLE_EMERGENCY_MODE" }
+  | { type: "TOGGLE_EMERGENCY_MODE"; payload?: number }
+  | { type: "SET_EMERGENCY_BUDGET"; payload: number }
   | { type: "ADD_CATEGORY"; payload: Omit<Category, "id"> }
   | { type: "DELETE_CATEGORY"; payload: string }
   | { type: "UPDATE_BALANCE"; payload: number }
@@ -90,6 +92,22 @@ const budgetReducer = (state: BudgetState, action: BudgetAction): BudgetState =>
         isOnboarded: true,
       };
     case "ADD_EXPENSE":
+      // Check if we're in emergency mode with a budget limit
+      if (state.emergencyMode && state.emergencyBudget !== null) {
+        // Calculate current monthly spending
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        const currentMonthlySpent = state.expenses
+          .filter(expense => new Date(expense.date) >= firstDayOfMonth)
+          .reduce((total, expense) => total + expense.amount, 0);
+
+        // Check if this expense would exceed the emergency budget
+        if (currentMonthlySpent + action.payload.amount > state.emergencyBudget) {
+          return state; // Don't add the expense if it exceeds the budget
+        }
+      }
+      
       const newExpense = {
         ...action.payload,
         id: Date.now().toString(),
@@ -112,6 +130,13 @@ const budgetReducer = (state: BudgetState, action: BudgetAction): BudgetState =>
       return {
         ...state,
         emergencyMode: !state.emergencyMode,
+        // Set emergency budget if provided, otherwise keep the existing one
+        emergencyBudget: action.payload !== undefined ? action.payload : state.emergencyBudget,
+      };
+    case "SET_EMERGENCY_BUDGET":
+      return {
+        ...state,
+        emergencyBudget: action.payload,
       };
     case "ADD_CATEGORY":
       return {
@@ -162,10 +187,11 @@ const budgetReducer = (state: BudgetState, action: BudgetAction): BudgetState =>
 // Create context
 type BudgetContextType = {
   state: BudgetState;
-  completeOnboarding: (data: Omit<BudgetState, "isOnboarded" | "expenses" | "emergencyMode" | "motivationalQuotes" | "currentQuote">) => void;
+  completeOnboarding: (data: Omit<BudgetState, "isOnboarded" | "expenses" | "emergencyMode" | "emergencyBudget" | "motivationalQuotes" | "currentQuote">) => void;
   addExpense: (expense: Omit<Expense, "id">) => void;
   deleteExpense: (id: string) => void;
-  toggleEmergencyMode: () => void;
+  toggleEmergencyMode: (budget?: number) => void;
+  setEmergencyBudget: (amount: number) => void;
   addCategory: (category: Omit<Category, "id">) => void;
   deleteCategory: (id: string) => void;
   updateBalance: (balance: number) => void;
@@ -175,6 +201,7 @@ type BudgetContextType = {
   getTotalSpent: () => number;
   getMonthlySpent: () => number;
   getDailyBudget: () => number;
+  getRemainingEmergencyBudget: () => number | null;
 };
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
@@ -221,15 +248,24 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // Calculate spent so far this month
     const monthlySpent = getMonthlySpent();
     
-    // Calculate remaining budget
-    const remainingBudget = state.monthlyIncome - monthlySpent;
+    // If in emergency mode with budget, use that for calculation
+    const availableBudget = state.emergencyMode && state.emergencyBudget !== null 
+      ? Math.max(0, state.emergencyBudget - monthlySpent) 
+      : state.monthlyIncome - monthlySpent;
     
     // Daily budget is remaining budget divided by remaining days
-    return remainingBudget / remainingDays;
+    return availableBudget / remainingDays;
+  };
+  
+  const getRemainingEmergencyBudget = (): number | null => {
+    if (state.emergencyBudget === null) return null;
+    
+    const monthlySpent = getMonthlySpent();
+    return Math.max(0, state.emergencyBudget - monthlySpent);
   };
 
   // Actions
-  const completeOnboarding = (data: Omit<BudgetState, "isOnboarded" | "expenses" | "emergencyMode" | "motivationalQuotes" | "currentQuote">) => {
+  const completeOnboarding = (data: Omit<BudgetState, "isOnboarded" | "expenses" | "emergencyMode" | "emergencyBudget" | "motivationalQuotes" | "currentQuote">) => {
     dispatch({ type: "COMPLETE_ONBOARDING", payload: data });
   };
 
@@ -237,12 +273,28 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // Check if user is in emergency mode and trying to add non-essential expense
     const category = getCategoryById(expense.categoryId);
     
-    if (state.emergencyMode && category && !category.isEssential) {
-      toast({
-        title: "Emergency Mode Active",
-        description: `${category.name} is a non-essential expense. Are you sure you want to proceed?`,
-        variant: "destructive",
-      });
+    if (state.emergencyMode) {
+      // Check if non-essential expense
+      if (category && !category.isEssential) {
+        toast({
+          title: "Emergency Mode Active",
+          description: `${category.name} is a non-essential expense. Are you sure you want to proceed?`,
+          variant: "destructive",
+        });
+      }
+      
+      // Check budget limit if set
+      if (state.emergencyBudget !== null) {
+        const monthlySpent = getMonthlySpent();
+        if (monthlySpent + expense.amount > state.emergencyBudget) {
+          toast({
+            title: "Budget Limit Exceeded",
+            description: `This expense would exceed your emergency budget of ${state.currency}${state.emergencyBudget}`,
+            variant: "destructive",
+          });
+          return; // Don't add the expense
+        }
+      }
     }
     
     dispatch({ type: "ADD_EXPENSE", payload: expense });
@@ -261,15 +313,34 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     dispatch({ type: "DELETE_EXPENSE", payload: id });
   };
 
-  const toggleEmergencyMode = () => {
-    dispatch({ type: "TOGGLE_EMERGENCY_MODE" });
+  const toggleEmergencyMode = (budget?: number) => {
+    // If turning on emergency mode and no budget is set yet, default to 70% of monthly income
+    const newBudget = budget !== undefined 
+      ? budget 
+      : (!state.emergencyMode && state.emergencyBudget === null) 
+        ? Math.round(state.monthlyIncome * 0.7) 
+        : state.emergencyBudget;
+    
+    dispatch({ 
+      type: "TOGGLE_EMERGENCY_MODE",
+      payload: newBudget !== undefined ? newBudget : undefined
+    });
     
     toast({
       title: state.emergencyMode ? "Emergency Mode Deactivated" : "Emergency Mode Activated",
       description: state.emergencyMode 
         ? "You can now spend on all categories." 
-        : "Only essential expenses allowed. Stay strong!",
+        : `Only essential expenses allowed with a budget of ${state.currency}${newBudget}. Stay strong!`,
       variant: state.emergencyMode ? "default" : "destructive",
+    });
+  };
+  
+  const setEmergencyBudget = (amount: number) => {
+    dispatch({ type: "SET_EMERGENCY_BUDGET", payload: amount });
+    
+    toast({
+      title: "Emergency Budget Updated",
+      description: `Your emergency budget is now ${state.currency}${amount}`,
     });
   };
 
@@ -313,6 +384,7 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         addExpense,
         deleteExpense,
         toggleEmergencyMode,
+        setEmergencyBudget,
         addCategory,
         deleteCategory,
         updateBalance,
@@ -322,6 +394,7 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         getTotalSpent,
         getMonthlySpent,
         getDailyBudget,
+        getRemainingEmergencyBudget,
       }}
     >
       {children}
