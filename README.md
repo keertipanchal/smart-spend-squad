@@ -1,6 +1,6 @@
-# 🧭 - Your Peaceful Budgeting Partner
+🧭 smart-spend-squad- Your Peaceful Budgeting Partner
 
-Welcome to *Calm Cash Compass*, a smart and peaceful way to take control of your money. Whether you’re a student handling pocket money or a professional managing salary, this web app helps you budget better without stress.
+Welcome to *smart-spend-squad*, a smart and peaceful way to take control of your money. Whether you’re a student handling pocket money or a professional managing salary, this web app helps you budget better without stress.
 
 🌐 *Live Web App:* [Click Here to Use Calm Cash Compass](https://your-web-link.com)
 
@@ -37,6 +37,6 @@ Welcome to *Calm Cash Compass*, a smart and peaceful way to take control of your
 
 ---
 
-## 💖 Created with love by Aarti
+## 💖 Created with love by KEERTI PANCHAL
 
 Feel free to fork, star, or suggest improvements! Happy budgeting 🌿
