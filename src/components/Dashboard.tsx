@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
   
   const balancePercentage = Math.min(
     100,
-    (state.balance / state.monthlyIncome) * 100 || 0
+    (state.monthlyIncome - monthlySpent) / state.monthlyIncome * 100 || 0
   );
 
   // Choose a motivational image based on emergency mode
@@ -108,7 +108,7 @@ const Dashboard: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               <span className="currency-symbol">{state.currency}</span>
-              {state.balance.toFixed(2)}
+              {(state.monthlyIncome - monthlySpent).toFixed(2)}
             </div>
             <Progress value={balancePercentage} className="h-2 mt-2" />
           </CardContent>
