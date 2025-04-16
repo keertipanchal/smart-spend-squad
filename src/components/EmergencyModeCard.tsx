@@ -4,12 +4,17 @@ import { useBudget } from "@/contexts/BudgetContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, Shield, TrendingDown } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const EmergencyModeCard: React.FC = () => {
   const { state, toggleEmergencyMode } = useBudget();
   
+  const handleToggle = () => {
+    toggleEmergencyMode();
+  };
+  
   return (
-    <Card className={`p-4 ${state.emergencyMode ? 'emergency-mode' : ''}`}>
+    <Card className={`p-4 ${state.emergencyMode ? 'bg-red-50 border-red-200' : ''}`}>
       <div className="flex items-start gap-3">
         <div className={`rounded-full p-2 ${state.emergencyMode ? 'bg-destructive/20' : 'bg-secondary'}`}>
           {state.emergencyMode ? (
@@ -34,7 +39,7 @@ const EmergencyModeCard: React.FC = () => {
             variant={state.emergencyMode ? "destructive" : "outline"}
             size="sm"
             className="w-full"
-            onClick={toggleEmergencyMode}
+            onClick={handleToggle}
           >
             {state.emergencyMode ? (
               <>

@@ -9,7 +9,7 @@ const Index = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background"
+      className={`min-h-screen bg-background ${state.emergencyMode ? 'emergency-mode' : ''}`}
       style={{
         backgroundImage: state.isOnboarded 
           ? "url('https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=10')" 
@@ -21,7 +21,7 @@ const Index = () => {
         backgroundAttachment: "fixed"
       }}
     >
-      <div className="min-h-screen backdrop-blur-sm bg-background/95">
+      <div className={`min-h-screen backdrop-blur-sm ${state.emergencyMode ? 'bg-background/98 border-l-4 border-destructive' : 'bg-background/95'}`}>
         {state.isOnboarded ? <Dashboard /> : <Onboarding />}
       </div>
     </div>
