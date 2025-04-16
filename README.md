@@ -4,7 +4,8 @@
 
 ## 🔗 Live Demo
 
-👉 [Click here to use Smart Spend Squad](https://your-live-link.com)
+👉 [Click here to use Smart Spend Squad](https://preview--smart-spend-squad.lovable.app/)
+
 
 ## 📌 Features
 
