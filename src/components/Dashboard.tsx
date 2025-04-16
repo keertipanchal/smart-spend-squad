@@ -10,20 +10,21 @@ import {
   PlusCircle, 
   TrendingDown, 
   TrendingUp, 
-  AlertTriangle, 
   RefreshCw,
   Wallet,
   PiggyBank,
-  Calendar
+  Calendar,
+  LineChart
 } from "lucide-react";
 import { format } from "date-fns";
 import AddExpense from "./AddExpense";
 import ExpensesList from "./ExpensesList";
+import SpendingChart from "./SpendingChart";
+import EmergencyModeCard from "./EmergencyModeCard";
 
 const Dashboard: React.FC = () => {
   const { 
     state, 
-    toggleEmergencyMode, 
     refreshQuote,
     getTotalSpent,
     getMonthlySpent,
@@ -47,6 +48,11 @@ const Dashboard: React.FC = () => {
     (state.balance / state.monthlyIncome) * 100 || 0
   );
 
+  // Choose a motivational image based on emergency mode
+  const motivationalImage = state.emergencyMode
+    ? "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+    : "https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* Header section */}
@@ -59,15 +65,6 @@ const Dashboard: React.FC = () => {
         </div>
         
         <div className="mt-4 md:mt-0 flex space-x-2">
-          <Button
-            variant={state.emergencyMode ? "default" : "outline"}
-            className={state.emergencyMode ? "bg-destructive text-white" : ""}
-            onClick={toggleEmergencyMode}
-          >
-            <AlertTriangle className="mr-2 h-4 w-4" />
-            {state.emergencyMode ? "Emergency Mode ON" : "Enable Emergency Mode"}
-          </Button>
-          
           <Button 
             onClick={() => setShowAddExpense(true)}
             className="bg-budget-purple hover:bg-budget-purple-dark"
@@ -78,15 +75,26 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
       
-      {/* Quote card */}
-      <Card className="mb-6">
-        <CardContent className="p-4 flex justify-between items-center">
-          <p className="italic text-budget-purple">"{state.currentQuote}"</p>
-          <Button variant="ghost" size="sm" onClick={refreshQuote}>
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Quote and emergency mode section */}
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
+        <Card className="md:col-span-2">
+          <CardContent className="p-4 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <img 
+                src={motivationalImage} 
+                alt="Motivation" 
+                className="h-12 w-12 rounded-full object-cover" 
+              />
+              <p className="italic text-budget-purple">"{state.currentQuote}"</p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={refreshQuote}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <EmergencyModeCard />
+      </div>
       
       {/* Stats cards */}
       <div className="grid gap-4 md:grid-cols-3 mb-6">
@@ -149,6 +157,7 @@ const Dashboard: React.FC = () => {
         <TabsList>
           <TabsTrigger value="expenses">Recent Expenses</TabsTrigger>
           <TabsTrigger value="summary">Monthly Summary</TabsTrigger>
+          <TabsTrigger value="charts">Spending Charts</TabsTrigger>
         </TabsList>
         
         <TabsContent value="expenses" className="space-y-4">
@@ -221,6 +230,20 @@ const Dashboard: React.FC = () => {
                   })}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="charts">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <LineChart className="mr-2 h-5 w-5 text-budget-purple" />
+                Spending Breakdown
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SpendingChart />
             </CardContent>
           </Card>
         </TabsContent>
