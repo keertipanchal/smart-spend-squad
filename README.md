@@ -19,7 +19,6 @@
 - HTML5
 - CSS3
 - JavaScript
-- [Add frameworks/libraries like React, Tailwind, Chart.js if used]
 
 ## 🗂️ Project Structure
 
