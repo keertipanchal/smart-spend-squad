@@ -1,42 +1,33 @@
-🧭 smart-spend-squad- Your Peaceful Budgeting Partner
+# 💰 Smart Spend Squad
 
-Welcome to *smart-spend-squad*, a smart and peaceful way to take control of your money. Whether you’re a student handling pocket money or a professional managing salary, this web app helps you budget better without stress.
+**Smart Spend Squad** is your personal budgeting buddy — designed to help you track, manage, and optimize your spending habits effortlessly. Whether you're a student or just starting to manage your own expenses, this app makes money management simple and smart.
 
-🌐 *Live Web App:* [Click Here to Use Calm Cash Compass](https://your-web-link.com)
+## 🔗 Live Demo
 
----
+👉 [Click here to use Smart Spend Squad](https://your-live-link.com)
 
 ## 📌 Features
 
-- 💱 *Currency Selector* – Choose your preferred currency (₹, $, €, etc.)
-- 👤 *User Role* – Are you a student or a working person? The app adjusts based on your choice
-- 💰 *Set Your Income* – Enter your current balance and monthly income (salary or pocket money)
-- 🧾 *Expense Categories* – Log your spending under categories like rent, food, personal, clothes, etc.
-- 🚨 *Emergency Mode* – Helps you cut down on unnecessary expenses and stay within your limits
-- 📊 *Insightful Dashboard* – Visualize income vs. spending clearly with clean graphs
-- 🌟 *Daily Motivation* – Friendly quotes and saving tips to inspire mindful spending
-- 📱 *Fully Responsive* – Works beautifully on phones, tablets, and desktops
+- 🧮 Easy expense tracking
+- 📊 Monthly budgeting insights
+- 🔔 Smart alerts for overspending
+- 💼 Category-wise spending breakdown
+- 🧠 Tips to improve financial habits
 
----
+## 💻 Tech Stack
 
-## 🛠 Tech Stack
+- HTML5
+- CSS3
+- JavaScript
+- [Add frameworks/libraries like React, Tailwind, Chart.js if used]
 
-- HTML5  
-- CSS3  
-- JavaScript  
-- (React if used for frontend logic)
+## 🗂️ Project Structure
 
----
-
-## 🚀 How to Use
-
-1. Go to the [Live App](https://your-web-link.com)
-2. Set up your profile with currency, user type, and income
-3. Add expenses and watch your dashboard update
-4. Turn on *Emergency Mode* when needed for mindful spending
-
----
-
-## 💖 Created with love by KEERTI PANCHAL
-
-Feel free to fork, star, or suggest improvements! Happy budgeting 🌿
+```bash
+📦 smart-spend-squad
+ ┣ 📂 assets
+ ┣ 📂 components
+ ┣ 📜 index.html
+ ┣ 📜 style.css
+ ┣ 📜 script.js
+ ┗ 📜 README.md
